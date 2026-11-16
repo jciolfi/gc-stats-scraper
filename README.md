@@ -16,13 +16,35 @@ There are different scrapers for two different versions of GameChanger: "GameCha
 
 ## new_v1
 
-**This only works with the new version of GameChanger. To scraper GameChanger classic, see classic_v2**
+**NOTE: You will probably be using this one**
 
-### Instructions to Execute the Program
-1. Navigate to GameChanger (not classic), sign in, and choose the team/season.
-2. Go to the stats tab and filter the desired games ("Filter Stats" on the right side).
-3. Click "Export Stats." Recommended: rename the csv and move it into the new_v1 folder for simplicity.
-4. Execute "./run {{path_to_exported_stats}} {{filename_for_scraped_stats}}"
+**This only works with the new version of GameChanger. To scraper GameChanger classic, see classic_v2.**
+
+`./run` reads a GameChanger stats export, puts the stats in NCBA order, and enters them into the NCBA site (admin.collclubsports.com) for one game, so you don't have to type each player into the Game Stats form. You need a Team Manager login for the team.
+
+CollClubSports has no public API. The uploader uses the same internal API that the admin site's Game Stats form uses, so if CollClubSports changes their site it may stop working.
+
+### Setup (once)
+Copy the .env.example to a new file called .env in the new_v1 folder, then fill in your CollClubSports login in `new_v1/.env`. If you skip this, you will be asked for it each time.
+
+### Uploading a game
+1. Navigate to GameChanger, sign in, and choose the team/season.
+2. Go to the stats tab and filter to the one game you want to upload ("Filter Stats" on the right side).
+3. Click "Export Stats." There's no need to move or rename the file; you can pass its path directly.
+4. Run `./run "path_to_stats.csv" --opponent "Oppponent Name on CollClubSports" --week {NUM} --game {NUM}` with filters that pick the game on the NCBA site. If more than one game matches, you pick it from a list:
+   - Example usage: `./run ~/Downloads/fall_bc_1.csv --opponent "Boston College" --week 8 --game 1`
+   - Add `--dry-run` to log in and see what would be uploaded without changing anything.
+5. Before uploading it shows the game, how many players are new vs. already entered, players matched by a close name (e.g. "Mike" vs. "Michael"), and players not found on the NCBA roster (these are skipped). Confirm with `y`, or pass `--yes` to skip the prompt.
+
+### Saving the converted CSV
+- `--save NAME` also writes the converted stats to `NAME.csv`.
+- `--no-upload` only converts (to `gc_stats.csv`, or `NAME.csv` with `--save`) and doesn't touch the NCBA site.
+- To upload a CSV you saved earlier (for example after fixing something in it by hand), run `./upload NAME.csv --opponent "Boston College" --week 8 --game 1`.
+
+### Notes
+- Export one game at a time from GameChanger. This way each game's stats is in its own .csv file which you need to upload per game to CollClubSports.
+- Players that already have stats for that game are updated, not duplicated, so re-running is safe.
+- Make sure to match the opponent name exactly as it is on CollClubSports. Binghamton for example would be "SUNY - Binghamton" and BC would be "Boston College".
 
 
 ## classic_v2
